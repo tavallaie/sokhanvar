@@ -2,32 +2,43 @@
 
 A Python library for Persian speech synthesis with YAML configuration and an optional Gradio playground. Repository: [tavallaie/sokhanvar](https://github.com/tavallaie/sokhanvar).
 
-Sokhanvar uses [Pocket TTS Farsi v2](https://huggingface.co/mehdi-hf/pocket-tts-farsi-v2) and its Persian G2P frontend. It preserves ezafe connections during chunking and lets you configure pauses, sampling, reference audio, and speech endings. Models load lazily and run on CPU.
+The built-in `pocket_tts_farsi` backend uses [Pocket TTS Farsi v2](https://huggingface.co/mehdi-hf/pocket-tts-farsi-v2) and its Persian G2P frontend. It preserves ezafe connections during chunking and lets you configure pauses, sampling, reference audio, and speech endings. Models load lazily and run on CPU.
 
 ## Install
 
 From this repository, using uv:
 
 ```bash
-uv sync                     # Library and CLI, without Gradio
-uv sync --extra playground  # Include the optional playground
+uv sync                                      # Core library and CLI
+uv sync --extra pocket                       # Pocket Farsi runtime
+uv sync --extra pocket --extra playground    # Pocket Farsi and Gradio
 ```
 
 In another project:
 
 ```bash
-uv add "sokhanvar @ git+https://github.com/tavallaie/sokhanvar.git"
+uv add "sokhanvar[pocket] @ git+https://github.com/tavallaie/sokhanvar.git"
 # Or include the UI:
-uv add "sokhanvar[playground] @ git+https://github.com/tavallaie/sokhanvar.git"
+uv add "sokhanvar[pocket,playground] @ git+https://github.com/tavallaie/sokhanvar.git"
 ```
 
 To use the current local checkout before it is pushed:
 
 ```bash
-uv add --editable /path/to/sokhanvar
+uv add --editable "/path/to/sokhanvar[pocket]"
 ```
 
 This checkout configures uv to use CPU-only PyTorch. Other projects should also configure their PyTorch source if they want CPU-only wheels. For example, add PyTorch as a direct dependency with `uv add torch --index pytorch-cpu=https://download.pytorch.org/whl/cpu` before adding Sokhanvar. The package is not published to PyPI yet.
+
+## Backend and model selection
+
+Every backend targets Persian, with `language: fa`. YAML selects the backend adapter and the model separately. `backend_options` carries options specific to other adapters. `uv run sokhanvar backends` lists registered and installed adapters without loading their models.
+
+Only `pocket_tts_farsi` ships with Sokhanvar today. Add other Persian TTS families through the [backend interface](docs/backends.md). A backend can consume Persian text directly or use its own pronunciation frontend. Pocket's G2P, ezafe token handling, and EOS settings stay in its adapter.
+
+For Pocket models, omitting `model_config` derives `hf://{model}/model.yaml` from the selected model. An explicit HF config must belong to that same repository. When changing a config object with `dataclasses.replace`, pass `model_config=None` with the new model to derive the new URI. The replacement model must support this Persian Pocket adapter.
+
+The playground displays the selected backend and model and exports both in YAML. Launch with a different config to switch models. Saved plans include backend and model identifiers; synthesis rejects a plan prepared for a different selection. Older plans without identifiers remain supported.
 
 ## Python API
 
@@ -49,7 +60,7 @@ speaker = Sokhanvar.from_yaml("sokhanvar.yaml")
 result = speaker.synthesize("امروز هوا خوب است. فردا به پارک می‌روم.", "speech.wav")
 ```
 
-`SynthesisResult` contains `audio_path`, `metadata_path`, and a metadata dictionary. Reuse a `Sokhanvar` instance to reuse loaded models. Library imports and CLI synthesis do not import or require Gradio. Missing reference audio raises an error; the library never selects another voice silently.
+`SynthesisResult` contains `audio_path`, `metadata_path`, and a metadata dictionary. Reuse a `Sokhanvar` instance to reuse loaded models. Library imports and CLI synthesis do not import or require Gradio. For backends that require a reference, missing reference audio raises an error; the library never selects another voice silently.
 
 To inspect or correct pronunciation before synthesis:
 
@@ -68,6 +79,10 @@ Reload an edited plan with `SpeechPlan.from_yaml("plan.yaml")`. Using a plan pre
 See [examples/sokhanvar.yaml](examples/sokhanvar.yaml) for every setting. Place your reference clip beside it, or change `reference_audio`.
 
 ```yaml
+backend: pocket_tts_farsi
+language: fa
+model: mehdi-hf/pocket-tts-farsi-v2
+backend_options: {}
 reference_audio: reference.wav
 reference_seconds: 5.0
 seed: 42
@@ -84,30 +99,30 @@ output_dir: outputs
 
 Relative paths in a loaded YAML file resolve beside that file, including `reference_audio`, `output_dir`, and a local `model_config`. Unknown keys and invalid values raise errors. YAML loads use `safe_load`. Config objects are immutable; use `dataclasses.replace(config, seed=123)` to create changed settings.
 
-The working defaults use at most five seconds of the selected reference, an EOS threshold of −2, and three ending frames, about 240 ms. The original uploaded clip is preserved. A lower EOS threshold can stop speech early; a higher value can cause repetition. Zero ending frames can cut off a final sound.
+The Pocket Farsi defaults use at most five seconds of the selected reference, an EOS threshold of −2, and three ending frames, about 240 ms. The original uploaded clip is preserved. A lower EOS threshold can stop speech early; a higher value can cause repetition. Zero ending frames can cut off a final sound.
 
 ## CLI without Gradio
 
 ```bash
-uv run sokhanvar config --output sokhanvar.yaml
+uv run --extra pocket sokhanvar config --output sokhanvar.yaml
 # Set reference_audio in the generated file, then:
-uv run sokhanvar synthesize --config sokhanvar.yaml --text "سلام، حال شما چطور است؟" --output speech.wav
-uv run sokhanvar synthesize --config sokhanvar.yaml --text-file article.txt --output article.wav
-uv run sokhanvar synthesize --config sokhanvar.yaml --plan plan.yaml --output edited.wav
+uv run --extra pocket sokhanvar synthesize --config sokhanvar.yaml --text "سلام، حال شما چطور است؟" --output speech.wav
+uv run --extra pocket sokhanvar synthesize --config sokhanvar.yaml --text-file article.txt --output article.wav
+uv run --extra pocket sokhanvar synthesize --config sokhanvar.yaml --plan plan.yaml --output edited.wav
 ```
 
 ## Playground and config generator
 
 ```bash
-uv run --extra playground sokhanvar playground
-uv run --extra playground sokhanvar playground --config sokhanvar.yaml
+uv run --extra pocket --extra playground sokhanvar playground
+uv run --extra pocket --extra playground sokhanvar playground --config sokhanvar.yaml
 ```
 
-Open http://127.0.0.1:7860. Use `--port` or `--host` to change the listening address. The first conversion downloads G2P weights; the first synthesis downloads TTS weights. Later runs reuse the Hugging Face cache.
+Open http://127.0.0.1:7860. Use `--port` or `--host` to change the listening address. For Pocket Farsi, the first conversion downloads G2P weights; the first synthesis downloads TTS weights. Later runs reuse the Hugging Face cache.
 
 Upload or record a short Persian reference. The playground saves it in `.cache/reference/` and restores it across page visits and restarts. Sample voices require explicit selection. Clearing the audio player forgets the saved selection. `PERSIAN_TTS_REFERENCE_DIR` changes the storage location.
 
-Convert your text, edit A/B phonemes and pause columns, and compare the generated audio. Changing text or punctuation controls requires another conversion. Generation uses the phrase rows. The Persian column labels the phrase; edit the phoneme column to change pronunciation.
+Convert your text, edit A/B phonemes and pause columns, and compare the generated audio. Changing text or punctuation controls requires another conversion. Generation uses the phrase rows. For Pocket Farsi, edit the phoneme column to change pronunciation. A native text backend uses the editable Persian phrase column.
 
 **Export YAML and portable bundle** downloads:
 
@@ -119,7 +134,7 @@ Extract the ZIP in another project, then use `Sokhanvar.from_yaml` or the CLI. Y
 
 ## Persian pauses and ezafe
 
-The model consumes romanized phonemes. G2P drops punctuation, so Sokhanvar preserves selected boundaries before conversion and inserts silence between separately synthesized phrases. Complete sentences are the default; comma splitting is optional because short fragments can hurt pronunciation and rhythm. Question punctuation does not guarantee question intonation.
+The built-in Pocket Farsi model consumes romanized phonemes. G2P drops punctuation, so Sokhanvar preserves selected boundaries before conversion and inserts silence between separately synthesized phrases. Complete sentences are the default; comma splitting is optional because short fragments can hurt pronunciation and rhythm. Question punctuation does not guarantee question intonation.
 
 For کتابِ من, `ketAbe1 man` contains the spoken linking vowel `e`. The `1` protects the word connection during chunking and is removed before TTS. Compare with `ketAb man` to hear the difference. Adding or removing only `1` does not change the spoken vowel. Do not insert a comma inside an ezafe phrase.
 
@@ -138,7 +153,7 @@ The project uses the repository's [Apache 2.0 license](LICENSE). The TTS weights
 ## Checks
 
 ```bash
-uv run python -m unittest discover -s tests -v
+uv run --extra pocket --extra playground python -m unittest discover -s tests -v
 uv build
 ```
 

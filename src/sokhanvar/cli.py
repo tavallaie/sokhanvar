@@ -1,6 +1,6 @@
 import argparse
 from pathlib import Path
-from . import Sokhanvar, SokhanvarConfig, SpeechPlan
+from . import Sokhanvar, SokhanvarConfig, SpeechPlan, available_backends
 
 
 def main():
@@ -15,14 +15,19 @@ def main():
     synth.add_argument("--output", required=True)
     config = commands.add_parser("config", help="Write a default YAML config")
     config.add_argument("--output", default="sokhanvar.yaml")
+    config.add_argument("--backend", default="pocket_tts_farsi")
+    config.add_argument("--model", help="Model identifier; required for additional backends")
+    commands.add_parser("backends", help="List built-in and installed backend plugins")
     playground = commands.add_parser("playground", help="Launch the optional Gradio UI")
     playground.add_argument("--config")
     playground.add_argument("--host", default="127.0.0.1")
     playground.add_argument("--port", default=7860, type=int)
     args = parser.parse_args()
     if args.command == "config":
-        SokhanvarConfig().to_yaml(args.output)
+        SokhanvarConfig(backend=args.backend, model=args.model).to_yaml(args.output)
         print(args.output)
+    elif args.command == "backends":
+        print("\n".join(available_backends()))
     elif args.command == "playground":
         launch_playground(args.config, args.host, args.port)
     else:

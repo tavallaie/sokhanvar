@@ -39,7 +39,7 @@ class LibraryTests(unittest.TestCase):
 
     def test_missing_reference_fails_before_loading_g2p(self):
         speaker = Sokhanvar()
-        with patch.object(speaker._engine, 'prepare') as prepare:
+        with patch.object(speaker.backend.engine, 'prepare') as prepare:
             with self.assertRaisesRegex(ValueError, 'reference_audio'):
                 speaker.synthesize('سلام')
             prepare.assert_not_called()
@@ -71,7 +71,7 @@ class LibraryTests(unittest.TestCase):
             wav, meta = folder / 'generated.wav', folder / 'generated.json'
             wav.write_bytes(b'wave'); meta.write_text('{}')
             plan = SpeechPlan('سلام', [Phrase('سلام', 'salAm')])
-            with patch.object(speaker._engine, 'render', return_value=(str(wav), str(meta), {})) as render:
+            with patch.object(speaker.backend.engine, 'render', return_value=(str(wav), str(meta), {})) as render:
                 result = speaker.synthesize_plan(plan, folder / 'chosen.wav')
             self.assertEqual(result.audio_path.read_bytes(), b'wave')
             self.assertEqual(result.metadata_path, folder / 'chosen.json')

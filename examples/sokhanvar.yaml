@@ -1,4 +1,7 @@
+backend: pocket_tts_farsi
+language: fa
 model: mehdi-hf/pocket-tts-farsi-v2
+backend_options: {}
 g2p_model: mehdi-hf/Homo-GE2PE-Persian-HF
 model_config: hf://mehdi-hf/pocket-tts-farsi-v2/model.yaml
 reference_audio: reference.wav

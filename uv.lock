@@ -1293,8 +1293,15 @@ name = "sokhanvar"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "pocket-tts" },
     { name = "pyyaml" },
+]
+
+[package.optional-dependencies]
+playground = [
+    { name = "gradio" },
+]
+pocket = [
+    { name = "pocket-tts" },
     { name = "scipy" },
     { name = "sentencepiece" },
     { name = "torch", version = "2.14.1", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform == 'darwin'" },
@@ -1303,23 +1310,18 @@ dependencies = [
     { name = "typer" },
 ]
 
-[package.optional-dependencies]
-playground = [
-    { name = "gradio" },
-]
-
 [package.metadata]
 requires-dist = [
     { name = "gradio", marker = "extra == 'playground'", specifier = ">=6.0,<7" },
-    { name = "pocket-tts", git = "https://github.com/mallahyari/pocket-tts?rev=3807c204babb5fe54be8fe18a362a58315e870d6" },
+    { name = "pocket-tts", marker = "extra == 'pocket'", git = "https://github.com/mallahyari/pocket-tts?rev=3807c204babb5fe54be8fe18a362a58315e870d6" },
     { name = "pyyaml", specifier = ">=6.0" },
-    { name = "scipy", specifier = ">=1.14" },
-    { name = "sentencepiece", specifier = ">=0.2" },
-    { name = "torch", specifier = ">=2.5", index = "https://download.pytorch.org/whl/cpu" },
-    { name = "transformers", specifier = ">=5.15,<6" },
-    { name = "typer", specifier = ">=0.15" },
+    { name = "scipy", marker = "extra == 'pocket'", specifier = ">=1.14" },
+    { name = "sentencepiece", marker = "extra == 'pocket'", specifier = ">=0.2" },
+    { name = "torch", marker = "extra == 'pocket'", specifier = ">=2.5", index = "https://download.pytorch.org/whl/cpu" },
+    { name = "transformers", marker = "extra == 'pocket'", specifier = ">=5.15,<6" },
+    { name = "typer", marker = "extra == 'pocket'", specifier = ">=0.15" },
 ]
-provides-extras = ["playground"]
+provides-extras = ["pocket", "playground"]
 
 [[package]]
 name = "starlette"
