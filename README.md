@@ -9,7 +9,13 @@ The included backend uses [Pocket TTS Farsi v2](https://huggingface.co/mehdi-hf/
 Requires Python 3.12, 3.13, or 3.14.
 
 ```bash
-uv add "sokhanvar[pocket] @ git+https://github.com/tavallaie/sokhanvar.git"
+uv add "sokhanvar[pocket]"
+```
+
+Or with pip:
+
+```bash
+pip install "sokhanvar[pocket]"
 ```
 
 For development from this repository:
@@ -45,17 +51,18 @@ The result contains the WAV path, JSON metadata path, and generation metadata. R
 
 See [the full configuration](examples/sokhanvar.yaml) for pronunciation, pause, and sampling settings.
 
-For CLI synthesis from the repository:
+For CLI synthesis:
 
 ```bash
-uv run --extra pocket sokhanvar synthesize \
+uv run sokhanvar synthesize \
   --config sokhanvar.yaml --text "امروز هوا خوب است." --output speech.wav
 ```
 
 ## Playground
 
 ```bash
-uv run --extra pocket --extra playground sokhanvar playground --config sokhanvar.yaml
+uv add "sokhanvar[pocket,playground]"
+uv run sokhanvar playground --config sokhanvar.yaml
 ```
 
 Open [localhost:7860](http://127.0.0.1:7860) to compare A/B pronunciation and pauses. The playground exports YAML settings, edited phrase plans, and a ZIP containing the reference recording for use in another project.
