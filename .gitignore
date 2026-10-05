@@ -218,3 +218,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local Sokhanvar audio and caches
+*.py[oc]
+*.egg-info
+outputs/
+.cache/

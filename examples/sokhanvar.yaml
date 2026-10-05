@@ -1,0 +1,15 @@
+model: mehdi-hf/pocket-tts-farsi-v2
+g2p_model: mehdi-hf/Homo-GE2PE-Persian-HF
+model_config: hf://mehdi-hf/pocket-tts-farsi-v2/model.yaml
+reference_audio: reference.wav
+reference_seconds: 5.0
+seed: 42
+temperature: 0.3
+eos_threshold: -2.0
+frames_after_eos: 3
+token_budget: 18
+split_at_commas: false
+comma_pause_ms: 150
+sentence_pause_ms: 250
+retries: 1
+output_dir: outputs
