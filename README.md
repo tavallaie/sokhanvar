@@ -144,7 +144,7 @@ Chunks are limited to 18 tokenizer tokens by default. Ezafe chains stay together
 
 ## Model dependencies and licensing
 
-The Pocket TTS fork is pinned to commit `3807c204babb5fe54be8fe18a362a58315e870d6`. Keep the model's YAML flags that disable capitalization, punctuation insertion, and short-input padding for phonemes. Synthesis uses the pinned fork's short-text streaming method to bypass its orthographic splitter, where `?` otherwise means a question mark. Recheck that method before upgrading the fork.
+The Pocket runtime is pinned to the PyPI release `pocket-tts==3.3.0`. This release supports the Persian model's capitalization flag, so no Git dependency is needed. Keep the model's YAML flags that disable capitalization, punctuation insertion, and short-input padding for phonemes. Synthesis uses the pinned runtime's short-text streaming method to bypass its orthographic splitter, where `?` otherwise means a question mark. The adapter supplies the cancellation event required by 3.3.0. Recheck that method before upgrading the runtime.
 
 Use Transformers 5.15 or newer. Transformers 4 can load this G2P checkpoint incorrectly and produce repeated characters. The normalizer is copied from the model repository, retrieved 2026-10-05. No weights are bundled. Model repository IDs and generated phonemes appear in output JSON; model repositories currently use their default revisions.
 
@@ -158,3 +158,15 @@ uv build
 ```
 
 Tests cover configuration validation and portability, library imports without UI, phrase plans, reference selection, audio conditioning, pauses, and ezafe-safe chunking. Speech quality still requires listening.
+
+## Publish to PyPI
+
+Build release artifacts without uv-specific sources and check their metadata:
+
+```bash
+uv build --no-sources
+uvx twine check dist/sokhanvar-0.1.0-py3-none-any.whl dist/sokhanvar-0.1.0.tar.gz
+uv publish dist/sokhanvar-0.1.0-py3-none-any.whl dist/sokhanvar-0.1.0.tar.gz
+```
+
+Published dependencies, including extras, use package names and version constraints. PyPI rejects direct Git URL dependencies. Keep credentials out of project files; enter your PyPI token at the password prompt with username `__token__`.

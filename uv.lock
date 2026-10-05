@@ -818,8 +818,8 @@ wheels = [
 
 [[package]]
 name = "pocket-tts"
-version = "3.1.0"
-source = { git = "https://github.com/mallahyari/pocket-tts?rev=3807c204babb5fe54be8fe18a362a58315e870d6#3807c204babb5fe54be8fe18a362a58315e870d6" }
+version = "3.3.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "einops" },
     { name = "fastapi" },
@@ -831,11 +831,16 @@ dependencies = [
     { name = "safetensors" },
     { name = "scipy" },
     { name = "sentencepiece" },
+    { name = "tokenizers" },
     { name = "torch", version = "2.14.1", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform == 'darwin'" },
     { name = "torch", version = "2.14.1+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform != 'darwin'" },
     { name = "typer" },
     { name = "typing-extensions" },
     { name = "uvicorn" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/56/e4/08262e47704291a99c211515b17e754d4891a899323a8171e220f468e45b/pocket_tts-3.3.0.tar.gz", hash = "sha256:997b3dd39d43c0555cdd9b8efd72ac926dbfcd250fb5f3575aa29c33db5b6621", size = 802539, upload-time = "2026-09-24T15:22:49.416Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1e/c0/9bf4453c170bfe15cbe71d9ec7bbd7052bea0275e5c0645f59be373b83ab/pocket_tts-3.3.0-py3-none-any.whl", hash = "sha256:77b2eb5554cb710e92888f84e28816f2361dba075e0ace47108458794db99111", size = 86452, upload-time = "2026-09-24T15:22:47.852Z" },
 ]
 
 [[package]]
@@ -1313,7 +1318,7 @@ pocket = [
 [package.metadata]
 requires-dist = [
     { name = "gradio", marker = "extra == 'playground'", specifier = ">=6.0,<7" },
-    { name = "pocket-tts", marker = "extra == 'pocket'", git = "https://github.com/mallahyari/pocket-tts?rev=3807c204babb5fe54be8fe18a362a58315e870d6" },
+    { name = "pocket-tts", marker = "extra == 'pocket'", specifier = "==3.3.0" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "scipy", marker = "extra == 'pocket'", specifier = ">=1.14" },
     { name = "sentencepiece", marker = "extra == 'pocket'", specifier = ">=0.2" },

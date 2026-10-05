@@ -1,5 +1,6 @@
 import json
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -27,6 +28,8 @@ class FakeTTS:
         return {}
 
     def _generate_audio_stream_short_text(self, **kwargs):
+        assert isinstance(kwargs["stop"], threading.Event)
+        assert not kwargs["stop"].is_set()
         self.inputs.append(kwargs["text_to_generate"])
         self.frames.append(kwargs["frames_after_eos"])
         yield torch.ones(2400) * 0.1

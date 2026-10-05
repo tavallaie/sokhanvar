@@ -127,6 +127,7 @@ class Engine:
                             model_state=voice_state, text_to_generate=spoken,
                             frames_after_eos=int(frames_after_eos),
                             copy_state=True,
+                            stop=threading.Event(),
                         )
                         audio = torch.cat(list(stream)).detach().cpu().numpy().reshape(-1)
                         duration = len(audio) / self.tts.sample_rate
